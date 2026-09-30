@@ -1,0 +1,4 @@
+import type { ButtonHTMLAttributes } from "react";
+import { cn } from "../../lib/utils";
+type Props = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "outline" | "whatsapp" | "ghost" | "danger"; size?: "sm" | "md" | "lg" };
+export function Button({ className, variant = "primary", size = "md", ...props }: Props) { const styles = { primary: "bg-primary text-white hover:opacity-90", outline: "border border-border bg-white text-primary hover:bg-gray-50", whatsapp: "bg-accent text-white hover:brightness-95", ghost: "bg-transparent text-primary hover:bg-gray-100", danger: "bg-danger text-white hover:opacity-90" }; const sizes = { sm: "h-9 px-3 text-xs", md: "h-10 px-4 text-sm", lg: "h-12 px-5 text-sm" }; return <button className={cn("inline-flex items-center justify-center gap-2 rounded-md font-semibold transition duration-150 disabled:cursor-not-allowed disabled:opacity-45", styles[variant], sizes[size], className)} {...props} />; }

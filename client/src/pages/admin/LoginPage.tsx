@@ -1,0 +1,9 @@
+import { LockKeyhole, Store } from "lucide-react";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { api } from "../../lib/api";
+import { queryKeys } from "../../lib/queries";
+export function LoginPage() { const navigate = useNavigate(); const queryClient = useQueryClient(); const [email, setEmail] = useState("admin@katalogwa.id"); const [password, setPassword] = useState("katalog123"); const login = useMutation({ mutationFn: () => api.login(email, password), onSuccess: (data) => { queryClient.setQueryData(queryKeys.me, data); navigate("/admin"); } }); return <main className="grid min-h-screen place-items-center p-4"><form onSubmit={(e) => { e.preventDefault(); login.mutate(); }} className="w-full max-w-md rounded-lg border border-border bg-white p-6 sm:p-8"><div className="grid h-11 w-11 place-items-center rounded-lg bg-primary text-white"><Store size={21}/></div><h1 className="mt-5 text-2xl font-bold">Masuk ke admin</h1><p className="mt-2 text-sm text-gray-500">Kelola katalog dan pesanan Toko Rapi Jaya.</p>{login.isError && <p className="mt-4 rounded-md bg-red-50 p-3 text-xs font-semibold text-danger">{(login.error as Error).message}</p>}<label className="mt-6 block text-xs font-bold">Email<Input className="mt-2" type="email" value={email} onChange={(e) => setEmail(e.target.value)}/></label><label className="mt-4 block text-xs font-bold">Kata sandi<Input className="mt-2" type="password" value={password} onChange={(e) => setPassword(e.target.value)}/></label><Button type="submit" disabled={login.isPending} className="mt-6 w-full" size="lg"><LockKeyhole size={17}/>{login.isPending ? "Memeriksa…" : "Masuk"}</Button></form></main>; }

@@ -1,0 +1,2 @@
+import { cn } from "../../lib/utils";
+export function Badge({ children, variant = "neutral", className }: { children: React.ReactNode; variant?: "neutral" | "success" | "danger" | "warning"; className?: string }) { const styles = { neutral: "bg-gray-100 text-gray-700", success: "bg-green-100 text-green-800", danger: "bg-red-100 text-red-800", warning: "bg-amber-100 text-amber-800" }; return <span className={cn("inline-flex rounded-md px-2 py-1 text-[11px] font-bold", styles[variant], className)}>{children}</span>; }

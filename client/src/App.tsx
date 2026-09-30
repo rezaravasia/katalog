@@ -1,0 +1,23 @@
+import "./App.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AdminLayout } from "./components/layout/AdminLayout";
+import { CheckoutLayout } from "./components/layout/CheckoutLayout";
+import { PublicLayout } from "./components/layout/PublicLayout";
+import { RequireAdmin } from "./components/layout/RequireAdmin";
+import { CategoriesPage } from "./pages/admin/CategoriesPage";
+import { DashboardPage } from "./pages/admin/DashboardPage";
+import { LoginPage } from "./pages/admin/LoginPage";
+import { OrdersPage } from "./pages/admin/OrdersPage";
+import { ProductFormPage } from "./pages/admin/ProductFormPage";
+import { ProductsPage } from "./pages/admin/ProductsPage";
+import { SettingsPage } from "./pages/admin/SettingsPage";
+import { AboutPage } from "./pages/public/AboutPage";
+import { CartPage } from "./pages/public/CartPage";
+import { CatalogPage } from "./pages/public/CatalogPage";
+import { CategoryPage } from "./pages/public/CategoryPage";
+import { CheckoutPage } from "./pages/public/CheckoutPage";
+import { FaqPage } from "./pages/public/FaqPage";
+import { ProductDetailPage } from "./pages/public/ProductDetailPage";
+const queryClient = new QueryClient();
+export default function App() { return <QueryClientProvider client={queryClient}><BrowserRouter><Routes><Route element={<PublicLayout/>}><Route path="/" element={<CatalogPage/>}/><Route path="/produk/:slug" element={<ProductDetailPage/>}/><Route path="/kategori/:slug" element={<CategoryPage/>}/><Route path="/keranjang" element={<CartPage/>}/><Route path="/tentang" element={<AboutPage/>}/><Route path="/faq" element={<FaqPage/>}/></Route><Route element={<CheckoutLayout/>}><Route path="/checkout" element={<CheckoutPage/>}/></Route><Route path="/admin/login" element={<LoginPage/>}/><Route element={<RequireAdmin/>}><Route path="/admin" element={<AdminLayout/>}><Route index element={<DashboardPage/>}/><Route path="produk" element={<ProductsPage/>}/><Route path="produk/baru" element={<ProductFormPage/>}/><Route path="produk/:id/edit" element={<ProductFormPage/>}/><Route path="kategori" element={<CategoriesPage/>}/><Route path="pesanan" element={<OrdersPage/>}/><Route path="pengaturan" element={<SettingsPage/>}/></Route></Route><Route path="*" element={<Navigate to="/" replace/>}/></Routes></BrowserRouter></QueryClientProvider>; }

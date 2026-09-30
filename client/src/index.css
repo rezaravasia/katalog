@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Ubuntu+Mono:wght@400;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face { font-family: "Idealist Sans"; src: local("Idealist Sans"), local("IdealistSans"); font-display: swap; }
+@layer base {
+  * { @apply border-border; }
+  html { @apply bg-[#FAFAFA]; }
+  body { @apply m-0 min-w-[320px] bg-[linear-gradient(180deg,#FAFAFA_0%,#F2F3F5_100%)] font-body text-sm text-[#111111] antialiased; text-shadow: 0 0 1.8px rgba(17,17,17,.18); }
+  button, input, textarea, select { font: inherit; }
+  input, textarea, select { text-shadow: 0 0 1.8px rgba(17,17,17,.18); }
+  h1, h2, h3, h4 { @apply font-heading text-[#111111]; }
+}
+@layer utilities {
+  .text-shadow-custom { text-shadow: 0 0 1.8px rgba(17,17,17,.18); }
+  .page-container { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+}
