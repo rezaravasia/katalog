@@ -2,10 +2,11 @@
   "name": "katalog-whatsapp",
   "private": true,
   "type": "module",
-  "engines": { "node": "20.x" },
+  "engines": { "node": "24.x" },
   "workspaces": ["client", "server"],
   "scripts": {
-    "build": "npm run build --workspace=katalog-whatsapp-client",
+    "build": "npm run build:server && npm run build:client",
+    "build:client": "npm run build --workspace=katalog-whatsapp-client",
     "build:server": "npm run build --workspace=katalog-whatsapp-server"
   }
 }
