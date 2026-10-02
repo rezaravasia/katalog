@@ -1,8 +1,100 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LayoutDashboard, LogOut, Menu, Package, ReceiptText, Settings, Tags, X } from "lucide-react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { api } from "../../lib/api";
+import { queryKeys, useSettings } from "../../lib/queries";
 import { storeSettings } from "../../mocks/storeSettings";
-import { useSettings } from "../../lib/queries";
 import { StoreLogo } from "./StoreLogo";
-const menu = [{ to: "/admin", label: "Dasbor", icon: LayoutDashboard, end: true }, { to: "/admin/produk", label: "Produk", icon: Package }, { to: "/admin/kategori", label: "Kategori", icon: Tags }, { to: "/admin/pesanan", label: "Pesanan", icon: ReceiptText }, { to: "/admin/pengaturan", label: "Pengaturan", icon: Settings }];
-export function AdminLayout() { const [open, setOpen] = useState(false); const { data: savedSettings } = useSettings(); const settings = savedSettings ?? storeSettings; const navigate = useNavigate(); const nav = <nav className="space-y-1">{menu.map(({ to, label, icon: Icon, end }) => <NavLink end={end} key={to} to={to} onClick={() => setOpen(false)} className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold transition ${isActive ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-100 hover:text-primary"}`}><Icon size={17}/>{label}</NavLink>)}</nav>; return <div className="min-h-screen bg-[#F7F7F8]"><aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-border bg-white p-4 lg:block"><Link to="/admin" className="mb-8 flex items-center gap-2 font-heading text-lg font-bold"><StoreLogo logoUrl={settings.logoUrl} className="h-9 w-9" iconSize={18}/>{settings.storeName}</Link>{nav}<div className="absolute bottom-4 left-4 right-4 border-t pt-4"><button onClick={() => navigate("/admin/login")} className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-gray-500 hover:bg-gray-100"><LogOut size={17}/>Keluar</button></div></aside><div className="lg:pl-64"><header className="sticky top-0 z-30 flex h-16 items-center border-b border-border bg-white px-4 sm:px-6"><button onClick={() => setOpen(!open)} className="rounded-md p-2 lg:hidden">{open ? <X size={20}/> : <Menu size={20}/>}</button><div className="ml-auto text-right"><p className="text-xs font-bold">Admin Rapi Jaya</p><p className="text-[11px] text-gray-500">admin@katalogwa.id</p></div></header>{open && <div className="fixed inset-x-0 top-16 z-30 border-b border-border bg-white p-4 shadow-sm lg:hidden">{nav}</div>}<main className="p-4 sm:p-6"><Outlet /></main></div></div>; }
+
+const menu = [
+  { to: "/admin", label: "Dasbor", icon: LayoutDashboard, end: true },
+  { to: "/admin/produk", label: "Produk", icon: Package },
+  { to: "/admin/kategori", label: "Kategori", icon: Tags },
+  { to: "/admin/pesanan", label: "Pesanan", icon: ReceiptText },
+  { to: "/admin/pengaturan", label: "Pengaturan", icon: Settings },
+];
+
+export function AdminLayout() {
+  const [open, setOpen] = useState(false);
+  const { data: savedSettings } = useSettings();
+  const settings = savedSettings ?? storeSettings;
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const logout = useMutation({
+    mutationFn: api.logout,
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.me });
+      queryClient.removeQueries({ queryKey: ["admin"] });
+      navigate("/admin/login", { replace: true });
+    },
+  });
+
+  const nav = (
+    <nav className="space-y-1">
+      {menu.map(({ to, label, icon: Icon, end }) => (
+        <NavLink
+          end={end}
+          key={to}
+          to={to}
+          onClick={() => setOpen(false)}
+          className={({ isActive }) =>
+            `flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold transition ${isActive ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-100 hover:text-primary"}`
+          }
+        >
+          <Icon size={17} />
+          {label}
+        </NavLink>
+      ))}
+    </nav>
+  );
+
+  const logoutButton = (
+    <button
+      type="button"
+      disabled={logout.isPending}
+      onClick={() => logout.mutate()}
+      className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-gray-500 hover:bg-gray-100 disabled:cursor-wait disabled:opacity-60"
+    >
+      <LogOut size={17} />
+      {logout.isPending ? "Keluar…" : "Keluar"}
+    </button>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#F7F7F8]">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-border bg-white p-4 lg:block">
+        <Link to="/admin" className="mb-8 flex items-center gap-2 font-heading text-lg font-bold">
+          <StoreLogo logoUrl={settings.logoUrl} className="h-9 w-9" iconSize={18} />
+          {settings.storeName}
+        </Link>
+        {nav}
+        <div className="absolute bottom-4 left-4 right-4 border-t pt-4">
+          {logoutButton}
+          {logout.isError && <p className="mt-2 px-3 text-xs font-semibold text-danger">Gagal keluar. Coba lagi.</p>}
+        </div>
+      </aside>
+      <div className="lg:pl-64">
+        <header className="sticky top-0 z-30 flex h-16 items-center border-b border-border bg-white px-4 sm:px-6">
+          <button onClick={() => setOpen(!open)} className="rounded-md p-2 lg:hidden" aria-label="Buka menu admin">
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
+          <div className="ml-auto text-right">
+            <p className="text-xs font-bold">Admin Rapi Jaya</p>
+            <p className="text-[11px] text-gray-500">admin@katalogwa.id</p>
+          </div>
+        </header>
+        {open && (
+          <div className="fixed inset-x-0 top-16 z-30 border-b border-border bg-white p-4 shadow-sm lg:hidden">
+            {nav}
+            <div className="mt-3 border-t pt-3">{logoutButton}</div>
+            {logout.isError && <p className="mt-2 px-3 text-xs font-semibold text-danger">Gagal keluar. Coba lagi.</p>}
+          </div>
+        )}
+        <main className="p-4 sm:p-6">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+}
