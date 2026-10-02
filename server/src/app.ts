@@ -14,7 +14,10 @@ import { publicRouter } from "./routes/public.js";
 import { uploadRouter } from "./routes/uploads.js";
 
 export const app = express();
-const origins = [...new Set([...(process.env.CORS_ORIGIN ?? "").split(",").map((value) => value.trim()).filter(Boolean), "http://localhost:5173", "http://localhost:5174"])];
+const vercelOrigins = [process.env.VERCEL_URL, process.env.VERCEL_PROJECT_PRODUCTION_URL]
+  .filter((value): value is string => Boolean(value))
+  .map((value) => value.startsWith("http") ? value : `https://${value}`);
+const origins = [...new Set([...(process.env.CORS_ORIGIN ?? "").split(",").map((value) => value.trim()).filter(Boolean), ...vercelOrigins, "http://localhost:5173", "http://localhost:5174"])];
 
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(cors({ origin(origin, callback) { if (!origin || origins.includes(origin)) return callback(null, true); callback(new Error("Origin tidak diizinkan oleh CORS.")); }, credentials: true }));
@@ -24,7 +27,7 @@ app.use(rateLimit({ windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 60_000)
 
 const escapeXml = (value: string) => value.replace(/[<>&'"]/g, (character) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", "\"": "&quot;" })[character] ?? character);
 app.get("/robots.txt", (_req, res) => res.type("text/plain").send("User-agent: *\nAllow: /\nSitemap: /sitemap.xml\n"));
-app.get("/sitemap.xml", async (_req, res, next) => { try { const appUrl = (process.env.APP_URL ?? "http://localhost:5173").replace(/\/$/, ""); const rows = await db.select({ slug: products.slug, updatedAt: products.updatedAt }).from(products).where(and(eq(products.status, "aktif"), isNull(products.deletedAt))); const urls = ["", ...rows.map((row) => `/produk/${row.slug}`)].map((route, index) => `<url><loc>${escapeXml(appUrl + route)}</loc>${index && rows[index - 1]?.updatedAt ? `<lastmod>${rows[index - 1].updatedAt.toISOString()}</lastmod>` : ""}</url>`); res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join("")}</urlset>`); } catch (error) { next(error); } });
+app.get("/sitemap.xml", async (_req, res, next) => { try { const appUrl = (process.env.APP_URL ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:5173")).replace(/\/$/, ""); const rows = await db.select({ slug: products.slug, updatedAt: products.updatedAt }).from(products).where(and(eq(products.status, "aktif"), isNull(products.deletedAt))); const urls = ["", ...rows.map((row) => `/produk/${row.slug}`)].map((route, index) => `<url><loc>${escapeXml(appUrl + route)}</loc>${index && rows[index - 1]?.updatedAt ? `<lastmod>${rows[index - 1].updatedAt.toISOString()}</lastmod>` : ""}</url>`); res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join("")}</urlset>`); } catch (error) { next(error); } });
 app.get(["/health", "/api/health"], (_req, res) => res.json({ ok: true }));
 app.use("/api/auth", authRouter);
 app.use("/api/orders", rateLimit({ windowMs: 60_000, limit: 10, standardHeaders: "draft-7", legacyHeaders: false, message: { message: "Terlalu banyak permintaan pesanan. Coba lagi dalam satu menit." } }));
