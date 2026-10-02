@@ -4,10 +4,11 @@ import multer from "multer";
 import sharp from "sharp";
 import { requireAdmin } from "../middleware/auth.js";
 export const uploadRouter = Router();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: Number(process.env.MAX_UPLOAD_MB ?? 2) * 1024 * 1024, files: 5 }, fileFilter: (_req, file, cb) => cb(null, ["image/jpeg", "image/png", "image/webp"].includes(file.mimetype)) });
-const storageBucket = process.env.SUPABASE_STORAGE_BUCKET ?? "catalog-assets";
-const storageUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const maxUploadMb = Number(process.env.MAX_UPLOAD_MB?.trim() || 2);
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: maxUploadMb * 1024 * 1024, files: 5 }, fileFilter: (_req, file, cb) => cb(null, ["image/jpeg", "image/png", "image/webp"].includes(file.mimetype)) });
+const storageBucket = process.env.SUPABASE_STORAGE_BUCKET?.trim() || "catalog-assets";
+const storageUrl = process.env.SUPABASE_URL?.trim().replace(/\/$/, "");
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
 async function uploadObject(objectPath: string, contents: Buffer) {
   if (!storageUrl || !serviceRoleKey) throw new Error("Supabase Storage belum dikonfigurasi.");
