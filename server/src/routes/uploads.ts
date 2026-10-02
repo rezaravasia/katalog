@@ -13,7 +13,11 @@ const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 async function uploadObject(objectPath: string, contents: Buffer) {
   if (!storageUrl || !serviceRoleKey) throw new Error("Supabase Storage belum dikonfigurasi.");
   const response = await fetch(`${storageUrl}/storage/v1/object/${storageBucket}/${objectPath}`, { method: "POST", headers: { authorization: `Bearer ${serviceRoleKey}`, apikey: serviceRoleKey, "content-type": "image/webp", "x-upsert": "false" }, body: contents });
-  if (!response.ok) throw new Error(`Upload gambar ke Supabase gagal (${response.status}).`);
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { message?: string; error?: string; code?: string } | null;
+    const detail = payload?.message ?? payload?.error ?? payload?.code;
+    throw new Error(`Upload gambar ke Supabase gagal (${response.status})${detail ? `: ${detail}` : "."}`);
+  }
   return `${storageUrl}/storage/v1/object/public/${storageBucket}/${objectPath}`;
 }
 
