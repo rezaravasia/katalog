@@ -1,9 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Ubuntu+Mono:wght@400;700&display=swap');
+@import "@fontsource/manrope/latin-400.css";
+@import "@fontsource/manrope/latin-500.css";
+@import "@fontsource/manrope/latin-600.css";
+@import "@fontsource/manrope/latin-700.css";
+@import "@fontsource/manrope/latin-800.css";
+@import "@fontsource/ubuntu-mono/latin-400.css";
+@import "@fontsource/ubuntu-mono/latin-700.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@font-face { font-family: "Idealist Sans"; src: local("Idealist Sans"), local("IdealistSans"); font-display: swap; }
+@font-face { font-family: "Idealist Sans"; src: url("/fonts/IdealistSans-Regular.ttf") format("truetype"); font-style: normal; font-weight: 400; font-display: swap; }
 @layer base {
   * { @apply border-border; }
   html { @apply bg-[#FAFAFA]; }

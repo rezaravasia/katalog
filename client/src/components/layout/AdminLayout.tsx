@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LayoutDashboard, LogOut, Menu, Package, ReceiptText, Settings, Tags, X } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
@@ -19,6 +19,7 @@ export function AdminLayout() {
   const [open, setOpen] = useState(false);
   const { data: savedSettings } = useSettings();
   const settings = savedSettings ?? storeSettings;
+  const { data: session } = useQuery({ queryKey: queryKeys.me, queryFn: api.me, staleTime: 5 * 60_000 });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const logout = useMutation({
@@ -79,9 +80,9 @@ export function AdminLayout() {
           <button onClick={() => setOpen(!open)} className="rounded-md p-2 lg:hidden" aria-label="Buka menu admin">
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
-          <div className="ml-auto text-right">
-            <p className="text-xs font-bold">Admin Rapi Jaya</p>
-            <p className="text-[11px] text-gray-500">admin@katalogwa.id</p>
+          <div className="ml-auto max-w-[70vw] text-right">
+            <p className="truncate text-xs font-bold" title={`Pemilik ${settings.storeName}`}>Pemilik {settings.storeName}</p>
+            <p className="truncate text-[11px] text-gray-500">{session?.user.email ?? "Akun admin"}</p>
           </div>
         </header>
         {open && (
