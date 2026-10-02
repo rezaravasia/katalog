@@ -8,11 +8,11 @@ const maxUploadMb = Number(process.env.MAX_UPLOAD_MB?.trim() || 2);
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: maxUploadMb * 1024 * 1024, files: 5 }, fileFilter: (_req, file, cb) => cb(null, ["image/jpeg", "image/png", "image/webp"].includes(file.mimetype)) });
 const storageBucket = process.env.SUPABASE_STORAGE_BUCKET?.trim() || "catalog-assets";
 const storageUrl = process.env.SUPABASE_URL?.trim().replace(/\/$/, "");
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+const storageServiceRoleKey = process.env.SUPABASE_STORAGE_SERVICE_ROLE_JWT?.trim() || process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
 async function uploadObject(objectPath: string, contents: Buffer) {
-  if (!storageUrl || !serviceRoleKey) throw new Error("Supabase Storage belum dikonfigurasi.");
-  const response = await fetch(`${storageUrl}/storage/v1/object/${storageBucket}/${objectPath}`, { method: "POST", headers: { authorization: `Bearer ${serviceRoleKey}`, apikey: serviceRoleKey, "content-type": "image/webp", "x-upsert": "false" }, body: contents });
+  if (!storageUrl || !storageServiceRoleKey) throw new Error("Supabase Storage belum dikonfigurasi.");
+  const response = await fetch(`${storageUrl}/storage/v1/object/${storageBucket}/${objectPath}`, { method: "POST", headers: { authorization: `Bearer ${storageServiceRoleKey}`, apikey: storageServiceRoleKey, "content-type": "image/webp", "x-upsert": "false" }, body: contents });
   if (!response.ok) {
     const payload = await response.json().catch(() => null) as { message?: string; error?: string; code?: string } | null;
     const detail = payload?.message ?? payload?.error ?? payload?.code;
